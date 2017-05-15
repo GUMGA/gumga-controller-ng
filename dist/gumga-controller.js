@@ -26,9 +26,10 @@
       },
       get: function get() {
         var page = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
+        var pageSize = arguments[1];
 
         self.emit('getStart');
-        Service.get(page).then(function (data) {
+        Service.get(page, pageSize).then(function (data) {
           self.emit('getSuccess', data.data);
           self.data = data.data.values;
           self.pageSize = data.data.pageSize;

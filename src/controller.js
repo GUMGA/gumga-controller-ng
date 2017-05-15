@@ -22,10 +22,10 @@
         self.emit('asyncPostStart');
         return Service.save(value);
       },
-      get(page = 1) {
+      get(page = 1, pageSize) {
         self.emit('getStart');
         Service
-          .get(page)
+          .get(page, pageSize)
           .then((data) => {
             self.emit('getSuccess', data.data);
             self.data = data.data.values;
