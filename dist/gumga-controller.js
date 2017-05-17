@@ -95,9 +95,9 @@
         });
         return self;
       },
-      sort: function sort(field, way) {
+      sort: function sort(field, way, pageSize) {
         self.emit('sortStart');
-        Service.sort(field, way).then(function (data) {
+        Service.sort(field, way, pageSize).then(function (data) {
           self.emit('sortSuccess', data.data);
           self.data = data.data.values;
           self.pageSize = data.data.pageSize;
@@ -107,9 +107,9 @@
         });
         return self;
       },
-      search: function search(field, param) {
+      search: function search(field, param, pageSize) {
         self.emit('searchStart');
-        Service.getSearch(field, param).then(function (data) {
+        Service.getSearch(field, param, pageSize).then(function (data) {
           self.emit('searchSuccess', data.data);
           self.data = data.data.values;
           self.pageSize = data.data.pageSize;
@@ -119,9 +119,9 @@
         });
         return self;
       },
-      advancedSearch: function advancedSearch(param) {
+      advancedSearch: function advancedSearch(param, pageSize) {
         self.emit('advancedSearchStart');
-        Service.getAdvancedSearch(param).then(function (data) {
+        Service.getAdvancedSearch(param, pageSize).then(function (data) {
           self.emit('advancedSearchSuccess', data.data);
           self.data = data.data.values;
           self.pageSize = data.data.pageSize;

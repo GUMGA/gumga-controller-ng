@@ -86,10 +86,10 @@
           }, (err) => { self.emit('deleteError', err); })
         return self;
       },
-      sort(field, way) {
+      sort(field, way, pageSize) {
         self.emit('sortStart');
         Service
-          .sort(field, way)
+          .sort(field, way, pageSize)
           .then((data) => {
             self.emit('sortSuccess', data.data);
             self.data = data.data.values;
@@ -98,10 +98,10 @@
           }, (err) => { self.emit('sortError', err); })
         return self;
       },
-      search(field, param) {
+      search(field, param, pageSize) {
         self.emit('searchStart');
         Service
-          .getSearch(field, param)
+          .getSearch(field, param, pageSize)
           .then((data) => {
             self.emit('searchSuccess', data.data);
             self.data = data.data.values;
@@ -110,10 +110,10 @@
           }, (err) => { self.emit('searchError', err); })
         return self;
       },
-      advancedSearch(param) {
+      advancedSearch(param, pageSize) {
         self.emit('advancedSearchStart');
         Service
-          .getAdvancedSearch(param)
+          .getAdvancedSearch(param, pageSize)
           .then((data) => {
             self.emit('advancedSearchSuccess', data.data);
             self.data = data.data.values;
