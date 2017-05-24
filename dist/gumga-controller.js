@@ -107,9 +107,9 @@
         });
         return self;
       },
-      search: function search(field, param, pageSize) {
+      search: function search(field, param, pageSize, page) {
         self.emit('searchStart');
-        Service.getSearch(field, param, pageSize).then(function (data) {
+        Service.getSearch(field, param, pageSize, page).then(function (data) {
           self.emit('searchSuccess', data.data);
           self.data = data.data.values;
           self.pageSize = data.data.pageSize;
@@ -119,9 +119,9 @@
         });
         return self;
       },
-      advancedSearch: function advancedSearch(param, pageSize) {
+      advancedSearch: function advancedSearch(param, pageSize, page) {
         self.emit('advancedSearchStart');
-        Service.getAdvancedSearch(param, pageSize).then(function (data) {
+        Service.getAdvancedSearch(param, pageSize, page).then(function (data) {
           self.emit('advancedSearchSuccess', data.data);
           self.data = data.data.values;
           self.pageSize = data.data.pageSize;

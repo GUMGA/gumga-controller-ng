@@ -98,10 +98,10 @@
           }, (err) => { self.emit('sortError', err); })
         return self;
       },
-      search(field, param, pageSize) {
+      search(field, param, pageSize, page) {
         self.emit('searchStart');
         Service
-          .getSearch(field, param, pageSize)
+          .getSearch(field, param, pageSize, page)
           .then((data) => {
             self.emit('searchSuccess', data.data);
             self.data = data.data.values;
@@ -110,10 +110,10 @@
           }, (err) => { self.emit('searchError', err); })
         return self;
       },
-      advancedSearch(param, pageSize) {
+      advancedSearch(param, pageSize, page) {
         self.emit('advancedSearchStart');
         Service
-          .getAdvancedSearch(param, pageSize)
+          .getAdvancedSearch(param, pageSize, page)
           .then((data) => {
             self.emit('advancedSearchSuccess', data.data);
             self.data = data.data.values;
