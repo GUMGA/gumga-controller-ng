@@ -1,12 +1,52 @@
 (function () {
   'use strict';
-  function GumgaController(Service) {
+  function GumgaController(Service, identifierOrConfiguration, container, pageModel) {
     let self = this;
     this.and = this;
     this.data = [];
     this.pageSize = 10;
     this.count = 0;
-    this.records = []
+    this.records = [];
+    this.pageModel = pageModel;
+    this.container = container;
+    this.identifierOrConfiguration = identifierOrConfiguration;
+
+    this.storage = {
+      set: (key, value) => {
+        sessionStorage.setItem(identifierOrConfiguration+'-'+key, value);
+      },
+      get: (key) => {
+        return sessionStorage.getItem(identifierOrConfiguration+'-'+key);
+      }
+    }
+
+    this.handlingStorage = (page, pageSize, field, way) => {
+      if(!page){
+        page = parseInt(self.storage.get('page') || 1);
+        self.container[pageModel] = page;
+      }
+      if(!pageSize){
+        pageSize = parseInt(self.storage.get('pageSize') || 10);
+      }
+      if(!field){
+        field = parseInt(self.storage.get('field'));
+      }
+      if(!way){
+        way = parseInt(self.storage.get('way'));
+      }
+      self.storage.set('page',     page     || 1);
+      self.storage.set('pageSize', pageSize || 10);
+      self.storage.set('field',    field);
+      self.storage.set('way',      way);
+
+      return {
+        page    : page,
+        pageSize: pageSize,
+        field:    field,
+        way:      way
+      }
+    }
+
     this.methods = {
       getRecords() {
         return self.records;
@@ -22,7 +62,10 @@
         self.emit('asyncPostStart');
         return Service.save(value);
       },
-      get(page = 1, pageSize) {
+      get(page, pageSize) {
+        const storage = self.handlingStorage(page, pageSize);
+        page     = storage.page;
+        pageSize = storage.pageSize;
         self.emit('getStart');
         Service
           .get(page, pageSize)
@@ -87,6 +130,10 @@
         return self;
       },
       sort(field, way, pageSize) {
+        const storage = self.handlingStorage(undefined, pageSize, field, way);
+        field     = storage.field;
+        way       = storage.way;
+        pageSize  = storage.pageSize;
         self.emit('sortStart');
         Service
           .sort(field, way, pageSize)
@@ -234,14 +281,14 @@
 
   function GumgaCtrl() {
 
-    function createRestMethods(container, service, identifierOrConfiguration) {
+    function createRestMethods(container, service, identifierOrConfiguration, pageModel = 'page') {
       let idConstructor = identifierOrConfiguration.constructor;
       if (!container) throw 'É necessário passar um objeto no primeiro parâmetro';
       if (!service) throw 'É necessário passar um objeto no segundo parâmetro';
       if (idConstructor !== Object && idConstructor !== String) throw 'É necessário passar um objeto ou uma string no terceiro parâmetro';
       const options = this._createOptions(identifierOrConfiguration);
-      if (!!options.noScope) return new GumgaController(service);
-      container[options.identifier] = new GumgaController(service);
+      if (!!options.noScope) return new GumgaController(service, identifierOrConfiguration, container, pageModel);
+      container[options.identifier] = new GumgaController(service, identifierOrConfiguration, container, pageModel);
       return;
     }
 
