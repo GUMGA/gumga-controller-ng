@@ -42,7 +42,7 @@
         way = (self.storage.get('way'));
       }
       if(!param){
-        param = (self.storage.get('param'));
+        param = "";
       }
       self.storage.set('page',     page     || self.page);
       self.storage.set('pageSize', pageSize || self.pageSize);
@@ -75,12 +75,17 @@
           case 'sort':
             self.methods.sort(self.storage.get('field'), self.storage.get('way'), self.storage.get('pageSize'));
             break;
+          case 'search':
+            self.methods.search(self.storage.get('field'), self.storage.get('param'), self.storage.get('pageSize'), self.storage.get('page'));
+            break;
           case 'asyncSearch':
             self.methods.asyncSearch(self.storage.get('field'), self.storage.get('param'));
             break;
           case 'advancedSearch':
-            self.methods.advancedSearch(self.storage.get('param'), self.storage.get('pageSize'), self.storage.get('page'));
+            self.methods.advancedSearch(JSON.parse(self.storage.get('param')), self.storage.get('pageSize'), self.storage.get('page'));
             break;
+          default:
+            self.methods.get(self.storage.get('page'), self.storage.get('pageSize'));
         }
       },
       getRecords() {
@@ -92,6 +97,7 @@
         return Service
           .getSearch(field, param)
           .then(function (data) {
+            self.storage.set('pageSize', data.data.pageSize);
             return data.data.values;
           });
       },
@@ -109,6 +115,7 @@
             self.emit('getSuccess', data.data);
             self.data = data.data.values;
             self.pageSize = data.data.pageSize;
+            self.storage.set('pageSize', data.data.pageSize);
             self.count = data.data.count;
             self.data.map(record => self.records.push(record.id))
           }, (err) => { self.emit('getError', err); })
@@ -177,6 +184,7 @@
             self.data = data.data.values;
             self.pageSize = data.data.pageSize;
             self.count = data.data.count;
+            self.storage.set('pageSize', data.data.pageSize);
           }, (err) => { self.emit('sortError', err); })
         return self;
       },
@@ -191,11 +199,12 @@
             self.data = data.data.values;
             self.pageSize = data.data.pageSize;
             self.count = data.data.count;
+            self.storage.set('pageSize', data.data.pageSize);
           }, (err) => { self.emit('searchError', err); })
         return self;
       },
       advancedSearch(param, pageSize, page) {
-        const storage = self.handlingStorage(page, pageSize, undefined, undefined, param);
+        const storage = self.handlingStorage(page, pageSize, undefined, undefined, JSON.stringify(param));
         self.storage.set('last-operation', 'advancedSearch');
         self.emit('advancedSearchStart');
         Service
@@ -205,6 +214,7 @@
             self.data = data.data.values;
             self.pageSize = data.data.pageSize;
             self.count = data.data.count;
+            self.storage.set('pageSize', data.data.pageSize);
           }, (err) => { self.emit('advancedSearchError', err); })
         return self;
       },
