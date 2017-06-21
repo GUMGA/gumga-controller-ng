@@ -76,18 +76,95 @@
 (function () {
   'use strict';
 
-  function GumgaController(Service) {
+  function GumgaController(Service, identifierOrConfiguration, container, pageModel) {
     var self = this;
     this.and = this;
     this.data = [];
+    this.page = 1;
     this.pageSize = 10;
     this.count = 0;
     this.records = [];
+    this.pageModel = pageModel;
+    this.container = container;
+    this.identifierOrConfiguration = identifierOrConfiguration;
+
+    this.storage = {
+      set: function set(key, value) {
+        sessionStorage.setItem(identifierOrConfiguration + '-' + key, value);
+      },
+      get: function get(key) {
+        return sessionStorage.getItem(identifierOrConfiguration + '-' + key);
+      }
+    };
+
+    this.setPageInContainer = function () {
+      if (!self.container[pageModel]) {
+        var page = parseInt(self.storage.get('page') || self.page);
+        self.container[pageModel] = page;
+      }
+    };
+
+    this.handlingStorage = function (page, pageSize, field, way, param) {
+      if (!page) {
+        page = parseInt(self.storage.get('page') || self.page);
+      }
+      if (!pageSize) {
+        pageSize = parseInt(self.storage.get('pageSize') || self.pageSize);
+      }
+      if (!field) {
+        field = self.storage.get('field');
+      }
+      if (!way) {
+        way = self.storage.get('way');
+      }
+      if (!param) {
+        param = self.storage.get('param');
+      }
+      self.storage.set('page', page || self.page);
+      self.storage.set('pageSize', pageSize || self.pageSize);
+      self.storage.set('field', field);
+      self.storage.set('way', way);
+      self.storage.set('param', param);
+
+      self.setPageInContainer();
+
+      return {
+        page: page,
+        pageSize: pageSize,
+        field: field,
+        way: way,
+        param: param
+      };
+    };
+
     this.methods = {
+      getLatestOperation: function getLatestOperation() {
+        self.setPageInContainer();
+        var operation = self.storage.get('last-operation');
+        if (!operation) {
+          self.methods.get(self.storage.get('page'), self.storage.get('pageSize'));
+        }
+        switch (operation) {
+          case 'get':
+            self.methods.get(self.storage.get('page'), self.storage.get('pageSize'));
+            break;
+          case 'sort':
+            self.methods.sort(self.storage.get('field'), self.storage.get('way'), self.storage.get('pageSize'));
+            break;
+          case 'asyncSearch':
+            self.methods.asyncSearch(self.storage.get('field'), self.storage.get('param'));
+            break;
+          case 'advancedSearch':
+            self.methods.advancedSearch(self.storage.get('param'), self.storage.get('pageSize'), self.storage.get('page'));
+            break;
+        }
+      },
       getRecords: function getRecords() {
         return self.records;
       },
       asyncSearch: function asyncSearch(field, param) {
+        var storage = self.handlingStorage(undefined, undefined, field, undefined, param);
+        self.storage.set('last-operation', 'asyncSearch');
         return Service.getSearch(field, param).then(function (data) {
           return data.data.values;
         });
@@ -96,10 +173,9 @@
         self.emit('asyncPostStart');
         return Service.save(value);
       },
-      get: function get() {
-        var page = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
-        var pageSize = arguments[1];
-
+      get: function get(page, pageSize) {
+        var storage = self.handlingStorage(page, pageSize);
+        self.storage.set('last-operation', 'get');
         self.emit('getStart');
         Service.get(page, pageSize).then(function (data) {
           self.emit('getSuccess', data.data);
@@ -168,8 +244,11 @@
         return self;
       },
       sort: function sort(field, way, pageSize) {
+        var storage = self.handlingStorage(undefined, pageSize, field, way);
+        var page = storage.page;
+        self.storage.set('last-operation', 'sort');
         self.emit('sortStart');
-        Service.sort(field, way, pageSize).then(function (data) {
+        Service.sort(field, way, pageSize, page).then(function (data) {
           self.emit('sortSuccess', data.data);
           self.data = data.data.values;
           self.pageSize = data.data.pageSize;
@@ -180,6 +259,8 @@
         return self;
       },
       search: function search(field, param, pageSize, page) {
+        var storage = self.handlingStorage(page, pageSize, field, undefined, param);
+        self.storage.set('last-operation', 'search');
         self.emit('searchStart');
         Service.getSearch(field, param, pageSize, page).then(function (data) {
           self.emit('searchSuccess', data.data);
@@ -192,6 +273,8 @@
         return self;
       },
       advancedSearch: function advancedSearch(param, pageSize, page) {
+        var storage = self.handlingStorage(page, pageSize, undefined, undefined, param);
+        self.storage.set('last-operation', 'advancedSearch');
         self.emit('advancedSearchStart');
         Service.getAdvancedSearch(param, pageSize, page).then(function (data) {
           self.emit('advancedSearchSuccess', data.data);
@@ -324,13 +407,15 @@
   function GumgaCtrl() {
 
     function createRestMethods(container, service, identifierOrConfiguration) {
+      var pageModel = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 'page';
+
       var idConstructor = identifierOrConfiguration.constructor;
       if (!container) throw 'É necessário passar um objeto no primeiro parâmetro';
       if (!service) throw 'É necessário passar um objeto no segundo parâmetro';
       if (idConstructor !== Object && idConstructor !== String) throw 'É necessário passar um objeto ou uma string no terceiro parâmetro';
       var options = this._createOptions(identifierOrConfiguration);
-      if (!!options.noScope) return new GumgaController(service);
-      container[options.identifier] = new GumgaController(service);
+      if (!!options.noScope) return new GumgaController(service, identifierOrConfiguration, container, pageModel);
+      container[options.identifier] = new GumgaController(service, identifierOrConfiguration, container, pageModel);
       return;
     }
 

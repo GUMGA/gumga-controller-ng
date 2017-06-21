@@ -86,11 +86,12 @@
 
           gumgaController.createRestMethods($scope, PessoaService, 'pessoa');
 
-          $scope.pessoa.methods.get($scope.page);
+          $scope.pessoa.methods.getLatestOperation();
 
           $scope.tableConfig = {
           columns: 'id, name, login',
           itemsPerPage: [5, 10],
+          checkboxColor: 'red',
           checkbox: true,
           disabledRow: function(row){
             return row.id == 3 || row.id == 7 || row.id == 16 || row.name == 'GumgaAdmin'

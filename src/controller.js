@@ -4,6 +4,7 @@
     let self = this;
     this.and = this;
     this.data = [];
+    this.page = 1;
     this.pageSize = 10;
     this.count = 0;
     this.records = [];
@@ -20,38 +21,74 @@
       }
     }
 
-    this.handlingStorage = (page, pageSize, field, way) => {
-      if(!page){
-        page = parseInt(self.storage.get('page') || 1);
+    this.setPageInContainer = () => {
+      if(!self.container[pageModel]){
+        const page = parseInt(self.storage.get('page') || self.page);
         self.container[pageModel] = page;
       }
+    }
+
+    this.handlingStorage = (page, pageSize, field, way, param) => {
+      if(!page){
+        page = parseInt(self.storage.get('page') || self.page);
+      }
       if(!pageSize){
-        pageSize = parseInt(self.storage.get('pageSize') || 10);
+        pageSize = parseInt(self.storage.get('pageSize') || self.pageSize);
       }
       if(!field){
-        field = parseInt(self.storage.get('field'));
+        field = (self.storage.get('field'));
       }
       if(!way){
-        way = parseInt(self.storage.get('way'));
+        way = (self.storage.get('way'));
       }
-      self.storage.set('page',     page     || 1);
-      self.storage.set('pageSize', pageSize || 10);
+      if(!param){
+        param = (self.storage.get('param'));
+      }
+      self.storage.set('page',     page     || self.page);
+      self.storage.set('pageSize', pageSize || self.pageSize);
       self.storage.set('field',    field);
       self.storage.set('way',      way);
+      self.storage.set('param',    param);
+
+      self.setPageInContainer();
 
       return {
         page    : page,
         pageSize: pageSize,
         field:    field,
-        way:      way
+        way:      way,
+        param:    param
       }
     }
 
     this.methods = {
+      getLatestOperation(){
+        self.setPageInContainer();
+        const operation = self.storage.get('last-operation');
+        if(!operation){
+            self.methods.get(self.storage.get('page'), self.storage.get('pageSize'));
+        }
+        switch (operation) {
+          case 'get':
+            self.methods.get(self.storage.get('page'), self.storage.get('pageSize'));
+            break;
+          case 'sort':
+            self.methods.sort(self.storage.get('field'), self.storage.get('way'), self.storage.get('pageSize'));
+            break;
+          case 'asyncSearch':
+            self.methods.asyncSearch(self.storage.get('field'), self.storage.get('param'));
+            break;
+          case 'advancedSearch':
+            self.methods.advancedSearch(self.storage.get('param'), self.storage.get('pageSize'), self.storage.get('page'));
+            break;
+        }
+      },
       getRecords() {
         return self.records;
       },
       asyncSearch(field, param) {
+        const storage = self.handlingStorage(undefined, undefined, field, undefined, param);
+        self.storage.set('last-operation', 'asyncSearch');
         return Service
           .getSearch(field, param)
           .then(function (data) {
@@ -64,8 +101,7 @@
       },
       get(page, pageSize) {
         const storage = self.handlingStorage(page, pageSize);
-        page     = storage.page;
-        pageSize = storage.pageSize;
+        self.storage.set('last-operation', 'get');
         self.emit('getStart');
         Service
           .get(page, pageSize)
@@ -131,12 +167,11 @@
       },
       sort(field, way, pageSize) {
         const storage = self.handlingStorage(undefined, pageSize, field, way);
-        field     = storage.field;
-        way       = storage.way;
-        pageSize  = storage.pageSize;
+        const page    = storage.page;
+        self.storage.set('last-operation', 'sort');
         self.emit('sortStart');
         Service
-          .sort(field, way, pageSize)
+          .sort(field, way, pageSize, page)
           .then((data) => {
             self.emit('sortSuccess', data.data);
             self.data = data.data.values;
@@ -146,6 +181,8 @@
         return self;
       },
       search(field, param, pageSize, page) {
+        const storage = self.handlingStorage(page, pageSize, field, undefined, param);
+        self.storage.set('last-operation', 'search');
         self.emit('searchStart');
         Service
           .getSearch(field, param, pageSize, page)
@@ -158,6 +195,8 @@
         return self;
       },
       advancedSearch(param, pageSize, page) {
+        const storage = self.handlingStorage(page, pageSize, undefined, undefined, param);
+        self.storage.set('last-operation', 'advancedSearch');
         self.emit('advancedSearchStart');
         Service
           .getAdvancedSearch(param, pageSize, page)
