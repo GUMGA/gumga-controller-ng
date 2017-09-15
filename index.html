@@ -34,18 +34,6 @@
 <body ng-controller="restCtrl">
 
   <div class="container">
-    <h3>Para o funcionamento do exemplo a seguir é necessária a instalação dos componentes:</h3>
-    <ul>
-      <li>Gumga Rest</li>
-      <li>Gumga Controller</li>
-    </ul>
-    <pre>
-  npm install gumga-rest-ng
-  npm install gumga-controller-ng
-  // ou
-  boewr install gumga-rest-ng
-  boewr install gumga-controller-ng
-  </pre>
     <div class="row">
       <form name="Example">
         Page: {{page}}
@@ -72,7 +60,7 @@
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
   <script src="node_modules/angular/angular.min.js"></script>
   <script src="./dist/gumga-controller.js"></script>
-  <script src="node_modules/gumga-rest-ng/dist/gumga-rest.js"></script>
+  <script src="node_modules/gumga-rest-ng/dist/gumga-rest.min.js"></script>
   <script src="node_modules/gumga-list-ng/dist/gumga-list.js"></script>
 
   <script>
@@ -86,19 +74,16 @@
 
           gumgaController.createRestMethods($scope, PessoaService, 'pessoa');
 
+          $scope.pessoa.methods.advancedSearch("obj.name like '%Ma%'");
           // $scope.pessoa.methods.getLatestOperation();
 
           $scope.tableConfig = {
           columns: 'id, name, login',
           itemsPerPage: [5, 10],
-          checkboxColor: 'red',
-          checkbox: true,
           disabledRow: function(row){
             return row.id == 3 || row.id == 7 || row.id == 16 || row.name == 'GumgaAdmin'
           },
           materialTheme: true,
-          // activeLineColor: 'red',
-          // hoverLineColor: 'red',
           ordination: true,
           resizable: true,
           fixed: {

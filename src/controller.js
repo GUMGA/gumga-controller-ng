@@ -218,6 +218,18 @@
           }, (err) => { self.emit('advancedSearchError', err); })
         return self;
       },
+      searchWithGQuery(gQuery, page, pageSize){
+        self.emit('searchWithGQueryStart');
+        Service
+          .searchWithGQuery(gQuery, page, pageSize)
+          .then((data) => {
+            self.emit('searchWithGQuerySuccess', data.data);
+            self.data = data.data.values;
+            self.pageSize = data.data.pageSize;
+            self.count = data.data.count;
+          }, (err) => { self.emit('searchWithGQueryError', err); })
+        return self;
+      },
       redoSearch() {
         self.emit('redoSearchStart');
         Service

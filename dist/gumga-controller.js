@@ -296,6 +296,18 @@
         });
         return self;
       },
+      searchWithGQuery: function searchWithGQuery(gQuery, page, pageSize) {
+        self.emit('searchWithGQueryStart');
+        Service.searchWithGQuery(gQuery, page, pageSize).then(function (data) {
+          self.emit('searchWithGQuerySuccess', data.data);
+          self.data = data.data.values;
+          self.pageSize = data.data.pageSize;
+          self.count = data.data.count;
+        }, function (err) {
+          self.emit('searchWithGQueryError', err);
+        });
+        return self;
+      },
       redoSearch: function redoSearch() {
         self.emit('redoSearchStart');
         Service.redoSearch().then(function (data) {
