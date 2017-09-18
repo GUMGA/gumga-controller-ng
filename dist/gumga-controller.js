@@ -297,6 +297,7 @@
         return self;
       },
       searchWithGQuery: function searchWithGQuery(gQuery, page, pageSize) {
+        self.lastGQuery = gQuery;
         self.emit('searchWithGQueryStart');
         Service.searchWithGQuery(gQuery, page, pageSize).then(function (data) {
           self.emit('searchWithGQuerySuccess', data.data);

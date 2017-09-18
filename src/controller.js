@@ -219,6 +219,7 @@
         return self;
       },
       searchWithGQuery(gQuery, page, pageSize){
+        self.lastGQuery = gQuery;
         self.emit('searchWithGQueryStart');
         Service
           .searchWithGQuery(gQuery, page, pageSize)
