@@ -50,8 +50,6 @@
       self.storage.set('way',      way);
       self.storage.set('param',    param);
 
-      self.setPageInContainer();
-
       return {
         page    : page,
         pageSize: pageSize,
