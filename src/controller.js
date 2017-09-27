@@ -104,6 +104,8 @@
         return Service.save(value);
       },
       get(page, pageSize) {
+        if(!pageSize) pageSize = self.pageSize;
+        if(!page) page = self.page;
         const storage = self.handlingStorage(page, pageSize);
         self.storage.set('last-operation', 'get');
         self.emit('getStart');
@@ -171,6 +173,7 @@
         return self;
       },
       sort(field, way, pageSize) {
+        if(!pageSize) pageSize = self.pageSize;
         const storage = self.handlingStorage(undefined, pageSize, field, way);
         const page    = storage.page;
         self.storage.set('last-operation', 'sort');
@@ -187,6 +190,8 @@
         return self;
       },
       search(field, param, pageSize, page) {
+        if(!pageSize) pageSize = self.pageSize;
+        if(!page) page = self.page;
         const storage = self.handlingStorage(page, pageSize, field, undefined, param);
         self.storage.set('last-operation', 'search');
         self.emit('searchStart');
@@ -202,6 +207,8 @@
         return self;
       },
       advancedSearch(param, pageSize, page) {
+        if(!pageSize) pageSize = self.pageSize;
+        if(!page) page = self.page;
         const storage = self.handlingStorage(page, pageSize, undefined, undefined, JSON.stringify(param));
         self.storage.set('last-operation', 'advancedSearch');
         self.emit('advancedSearchStart');
@@ -217,6 +224,8 @@
         return self;
       },
       searchWithGQuery(gQuery, page, pageSize){
+        if(!pageSize) pageSize = self.pageSize;
+        if(!page) page = self.page;
         self.lastGQuery = gQuery;
         self.emit('searchWithGQueryStart');
         Service
@@ -250,6 +259,7 @@
         return self;
       },
       getQuery(page) {
+        if(!page) page = self.page;
         self.emit('getQueryStart');
         return Service
           .getQuery(page)

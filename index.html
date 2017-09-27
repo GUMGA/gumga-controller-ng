@@ -36,8 +36,7 @@
   <div class="container">
     <div class="row">
       <form name="Example">
-        Page: {{page}}
-        PageSize: {{pessoa.pageSize}}
+        <h1>Teste de Qnt: {{pessoa.pageSize}}</h1>
         <div class="col-md-12">
           <gumga-list sort="pessoa.methods.sort(field, dir, pageSize)"
                       data="pessoa.data"
@@ -74,10 +73,13 @@
 
           gumgaController.createRestMethods($scope, PessoaService, 'pessoa');
 
-          $scope.pessoa.methods.advancedSearch("obj.name like '%Ma%'");
+          $scope.pessoa.pageSize = 20;
+
+          $scope.pessoa.methods.search('name', 'Ma');
+          // $scope.pessoa.methods.get();
           // $scope.pessoa.methods.getLatestOperation();
 
-          console.log($scope.pessoa);
+          // console.log($scope.pessoa);
 
           $scope.tableConfig = {
           columns: 'id, name, login',
