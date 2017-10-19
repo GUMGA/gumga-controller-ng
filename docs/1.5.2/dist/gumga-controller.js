@@ -315,20 +315,6 @@
           self.emit('searchWithGQueryError', err);
         });
       },
-      asyncSearchWithGQuery: function asyncSearchWithGQuery(gQuery, page, pageSize) {
-        if (!pageSize) pageSize = self.pageSize;
-        if (!page) page = self.page;
-        self.lastGQuery = gQuery;
-        self.emit('asyncSearchWithGQuery');
-        return Service.searchWithGQuery(gQuery, page, pageSize).then(function (data) {
-          self.emit('asyncSearchWithGQuery', data.data);
-          self.pageSize = data.data.pageSize;
-          self.count = data.data.count;
-          return data.data.values;
-        }, function (err) {
-          self.emit('asyncSearchWithGQuery', err);
-        });
-      },
       redoSearch: function redoSearch() {
         self.emit('redoSearchStart');
         Service.redoSearch().then(function (data) {
