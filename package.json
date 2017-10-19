@@ -1,6 +1,6 @@
 {
   "name": "gumga-controller-ng",
-  "version": "1.5.0",
+  "version": "1.5.1",
   "description": "Gumga Controller",
   "main": "./src/controller.js",
   "directories": {
@@ -60,5 +60,13 @@
     "angular 1.x"
   ],
   "author": "Gumga Tecnologia da Informação S/A",
-  "license": "LGPL-3.0"
+  "license": "LGPL-3.0",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests",
+    "docs/**"
+  ]
 }

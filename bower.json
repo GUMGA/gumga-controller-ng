@@ -1,6 +1,6 @@
 {
   "name": "gumga-controller-ng",
-  "version": "1.5.0",
+  "version": "1.5.1",
   "description": "Gumga Controller",
   "main": "./src/controller.js",
   "authors": [
@@ -18,7 +18,8 @@
     "node_modules",
     "bower_components",
     "test",
-    "tests"
+    "tests",
+    "docs/**"
   ],
   "dependencies": {
     "angular": "1.5.8"
