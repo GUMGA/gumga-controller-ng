@@ -1,3 +1,5 @@
+import { QueryObject } from './query-object';
+
 (function () {
   'use strict';
   function GumgaController(Service, identifierOrConfiguration, container, pageModel) {
@@ -115,8 +117,8 @@
             self.emit('getSuccess', data.data);
             self.data = data.data.values;
             self.pageSize = data.data.pageSize;
-            self.storage.set('pageSize', data.data.pageSize);
             self.count = data.data.count;
+            self.storage.set('pageSize', data.data.pageSize);
             self.data.map(record => self.records.push(record.id))
           }, (err) => { self.emit('getError', err); })
         return self;
@@ -310,6 +312,9 @@
       getDocumentationURL() {
         self.emit('getDocumentationURLStart')
         return Service.getDocumentationURL()
+      },
+      createQuery(){
+        return new QueryObject(Service, self);
       }
     };
   }

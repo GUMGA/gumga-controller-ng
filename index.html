@@ -36,9 +36,9 @@
   <div class="container">
     <div class="row">
       <form name="Example">
-        <h1>Teste de Qnt: {{pessoa.pageSize}}</h1>
+        <h1>Teste de Qnt: {{pessoa.pageSize}} {{pessoa.page}}</h1>
         <div class="col-md-12">
-          <gumga-list sort="pessoa.methods.sort(field, dir, pageSize)"
+          <gumga-list sort="buscar(page, pessoa.pageSize, field, dir)"
                       data="pessoa.data"
                       selected-values="mateus"
                       name="pessoa"
@@ -48,13 +48,14 @@
                       page-align="flex-end"
                       count="pessoa.count"
                       page-model="page"
-                      on-page-change="pessoa.methods.get(page, pageSize)"
+                      on-page-change="buscar(page, pessoa.pageSize, field, dir)"
             ></gumga-list>
         </div>
       </form>
     </div>
   </div>
 
+  <script src="https://unpkg.com/gumga-gquery-ng@1.1.1/dist/gumga-gquery.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
   <script src="node_modules/angular/angular.min.js"></script>
@@ -69,21 +70,26 @@
       })
       .controller('restCtrl', ['gumgaController', 'GumgaRest', '$scope', '$http', '$q',
         function (gumgaController, GumgaRest, $scope, $http, $q) {
-          var PessoaService = new GumgaRest('https://gumga.io/security-api/api/user');
+          var PessoaService = new GumgaRest('http://192.168.253.246:8084/security-api/api/user');
 
           gumgaController.createRestMethods($scope, PessoaService, 'pessoa');
 
-          $scope.pessoa.pageSize = 20;
+          $scope.buscar = function(page, pageSize, field, dir){
+            $scope.pessoa.methods.createQuery()
+                       .pageSize(pageSize)
+                       .page(page)
+                       .sort(field, dir)
+                       .sort('login', 'desc')
+                       .sort('id', 'desc')
+                      //  .gQuery(new GQuery(new Criteria('name', ComparisonOperator.CONTAINS, 'ma')))
+                       .send();
+          }
 
-          $scope.pessoa.methods.search('name', 'Ma');
-          // $scope.pessoa.methods.get();
-          // $scope.pessoa.methods.getLatestOperation();
-
-          // console.log($scope.pessoa);
+          $scope.buscar(1, 5, 'name', 'desc');
 
           $scope.tableConfig = {
           columns: 'id, name, login',
-          itemsPerPage: [5, 10],
+          itemsPerPage: [5, 6, 10],
           disabledRow: function(row){
             return row.id == 3 || row.id == 7 || row.id == 16 || row.name == 'GumgaAdmin'
           },

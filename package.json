@@ -1,13 +1,15 @@
 {
   "name": "gumga-controller-ng",
-  "version": "1.5.0",
+  "version": "1.6.0",
   "description": "Gumga Controller",
   "main": "./src/controller.js",
   "directories": {
     "example": "example"
   },
   "dependencies": {
-    "angular": "1.5.8"
+    "angular": "1.5.8",
+    "gumga-list-ng": "^1.12.0",
+    "gumga-rest-ng": "^1.6.0"
   },
   "babel": {
     "presets": [
