@@ -230,15 +230,28 @@ import { QueryObject } from './query-object';
         if(!page) page = self.page;
         self.lastGQuery = gQuery;
         self.emit('searchWithGQueryStart');
-        Service
+        return Service
           .searchWithGQuery(gQuery, page, pageSize)
           .then((data) => {
             self.emit('searchWithGQuerySuccess', data.data);
             self.data = data.data.values;
             self.pageSize = data.data.pageSize;
             self.count = data.data.count;
-          }, (err) => { self.emit('searchWithGQueryError', err); })
-        return self;
+          }, (err) => { self.emit('searchWithGQueryError', err); })        
+      },
+      asyncSearchWithGQuery(gQuery, page, pageSize){
+        if(!pageSize) pageSize = self.pageSize;
+        if(!page) page = self.page;
+        self.lastGQuery = gQuery;
+        self.emit('asyncSearchWithGQuery');
+        return Service
+          .searchWithGQuery(gQuery, page, pageSize)
+          .then((data) => {
+            self.emit('asyncSearchWithGQuery', data.data);
+            self.pageSize = data.data.pageSize;
+            self.count = data.data.count;
+            return data.data.values
+          }, (err) => { self.emit('asyncSearchWithGQuery', err); })        
       },
       redoSearch() {
         self.emit('redoSearchStart');

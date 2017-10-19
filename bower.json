@@ -18,7 +18,8 @@
     "node_modules",
     "bower_components",
     "test",
-    "tests"
+    "tests",
+    "docs/**"
   ],
   "dependencies": {
     "angular": "1.5.8"
