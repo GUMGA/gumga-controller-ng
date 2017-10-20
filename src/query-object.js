@@ -58,7 +58,8 @@ export class QueryObject {
     */
     q(_fields, _value){
         if(!_fields) console.error("Ao chamar o método um q é obrigatório informar os atributos que serão utilizados na busca.");
-        this.queryObject.searchFields = _fields;
+        this.queryObject.searchFields = this.queryObject.searchFields || [];
+        _fields.trim().split(',').forEach(_field => this.queryObject.searchFields.push(_field.trim()));
         this.queryObject.q = _value;
         return this;
     }

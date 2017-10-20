@@ -155,8 +155,13 @@ var QueryObject = exports.QueryObject = function () {
     }, {
         key: "q",
         value: function q(_fields, _value) {
+            var _this = this;
+
             if (!_fields) console.error("Ao chamar o método um q é obrigatório informar os atributos que serão utilizados na busca.");
-            this.queryObject.searchFields = _fields;
+            this.queryObject.searchFields = this.queryObject.searchFields || [];
+            _fields.trim().split(',').forEach(function (_field) {
+                return _this.queryObject.searchFields.push(_field.trim());
+            });
             this.queryObject.q = _value;
             return this;
         }
@@ -204,15 +209,15 @@ var QueryObject = exports.QueryObject = function () {
     }, {
         key: "send",
         value: function send() {
-            var _this = this;
+            var _this2 = this;
 
             if (!this.service.sendQueryObject) {
                 console.error("Precisamos que você atualize a versão do componente gumga-rest-ng, acesse: https://github.com/GUMGA/gumga-rest-ng/releases");
             }
             return this.service.sendQueryObject(this.queryObject).then(function (resp) {
-                _this.controller.data = resp.data.values;
-                _this.controller.pageSize = resp.data.pageSize;
-                _this.controller.count = resp.data.count;
+                _this2.controller.data = resp.data.values;
+                _this2.controller.pageSize = resp.data.pageSize;
+                _this2.controller.count = resp.data.count;
                 return resp;
             });
         }

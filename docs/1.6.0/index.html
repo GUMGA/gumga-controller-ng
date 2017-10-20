@@ -36,6 +36,10 @@
           <h2>Descrição</h2>
           <p>O componente GumgaController foi desenvolvido como um substituto ao componente $populate. Sentimos que os desenvolvedores, ao utilizar o $populate, não entenderam muito bem o porquê do componente(talvez por causa do nome, também). Demos um passo atrás e chegamos neste componente que faz o que o $populate faz, porém funcionando também fora do $scope do controller, podendo ser colocado dentro de qualquer objeto.
 Este componente pode ser utilizado para criar os métodos que fazem conexão com o service GumgaREST, que podem ser utilizados para fazer a comunicação com o BackEnd, respeitando o modelo MVC do Angular. Além disse, ele tem suporte a eventos próprios, não necessitando do $scope.</p>
+        
+            <p class="text-warning">
+              Obs: Novo método createQuery() com ele é possível fazer ordanazações, filtros e páginação em uma única chamada, onde você pode usar o aq ou o gQuery.
+            </p>
         </div>
         <div class="col-xs-8">
           <h3>Instalação</h3>
@@ -52,61 +56,60 @@ angular.module('yourApp', ['gumga.controller']);
 &lt;script src="bower_components/gumga-counter-ng/dist/gumga-controller.min.js"&gt;&lt;/script&gt;</code></pre>
         </div>
       </div>
+
       <div class="panel panel-default">
         <div class="panel-heading">
-          Usando
+          <h3>Populando o controller</h3>
         </div>
         <div class="panel-body">
-          <div class="row">
-            <!-- <div class="col-xs-5">
-            </div> -->
-            <div class="col-xs-12">
-              <ul class="nav nav-tabs" role="tablist">
-                <!-- <li role="presentation" class="active"><a href="#html" aria-controls="home" role="tab" data-toggle="tab">HTML</a></li> -->
-                <li role="presentation"  class="active"><a href="#js" aria-controls="profile" role="tab" data-toggle="tab">JavaScript</a></li>
-              </ul>
-              <div class="tab-content">
-                <div role="tabpanel" class="tab-pane " id="html">
-                  <pre><code  class="prettyprint"></code></pre>
-                </div>
-                <div role="tabpanel" class="tab-pane active" id="js">
-                  <pre><code class="prettyprint">angular.module('yourApp', ['gumga.controller'])
-.controller('ctrl', function($scope, SampleService, gumgaController){
-  gumgaController.createRestMethods($scope,SampleService,'sample')
-  // O objeto pode ser retornado caso queira
-  // var user = gumgaController.createRestMethods({}, SampleService, {
-  // noScope: true,
-  // identifier: 'Sample'
-  // })
+          Quando você utiliza o gumga controller, ele cria seu escopo vários métodos que te ajudam na comunicação com o backend. <br>
+          O controller depende de um serviço que seja um GumgaRest, sua documentação você encontra em <a href="https://gumga.github.io/gumga-rest-ng">https://gumga.github.io/gumga-rest-ng</a><br><br>
+          No exemplo iremos conectar a um serviço de "cliente" para podermos fazer buscas, alterações, deleções etc...  <br>
+          Chame o método <b>createRestMethods</b> passando seu escopo, seu serviço e um nome na qual faremos a criação dos métodos.
 
-  $scope
-  .sample
-  .methods.get(0)
-  .on('getSuccess',function(data){
-      // ...
-  })
-  .on('getError', function(data){
-      // ...
-  })
-  .methods.post({});
-
-  $scope
-  .sample
-  .on('postTagSuccess', function (data){
-      $scope.sample.execute('post');
-  })
-
+          <pre><code class="prettyprint">angular.module('yourApp', ['gumga.controller'])
+.service('ClienteService', function(GumgaRest){
+  var service = new GumgaRest('http://www.minhaaplicacao.com.br/api/cliente');
+  return service;
 })
-</code></pre>
-                </div>
-              </div>
-            </div>
-          </div>
+.controller('ctrl', function($scope, ClienteService, gumgaController){
+  gumgaController.createRestMethods($scope, ClienteService, 'cliente');   
+})</code></pre>
+        Perceba que como ultimo parâmetro passamos o valor "cliente", o gumga controller criará uma variável com esse nome informado dentro do seu escopo.<br>
+        Após fazer a chamada do <b>createRestMethods</b> você já pode chamar os métodos criados. <br> <br>
+
+        Exemplo de uma chamada GET.
+
+        <pre><code class="prettyprint">$scope.cliente.methods.get()</code></pre>
+
         </div>
       </div>
+
       <div class="panel panel-default">
         <div class="panel-heading">
-          Atributos
+          <h3>Filtrando, ordenando e páginando</h3>
+        </div>
+        <div class="panel-body">
+          <pre><code class="prettyprint">$scope.pessoa.methods.createQuery() //Cria um QueryObject
+.pageSize(10) //Quantidade de registros por página
+.page(1) //Página que será buscado os registros
+.sort('name', 'desc') //Ordenação dos registros
+.gQuery(new GQuery(new Criteria('name', ComparisonOperator.CONTAINS, 'ma'))) //Filtro usando GQuery.
+.send() //Faz a chamada ao backend.
+.then(
+  resp => {
+    console.log(resp);
+  },
+  err => {
+    console.log(err);
+  }
+)</code></pre>
+        </div>
+      </div>
+
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h3>Métodos criados pelo controller</h3>
         </div>
         <table class="table table-striped">
           <thead>
@@ -117,6 +120,11 @@ angular.module('yourApp', ['gumga.controller']);
             </tr>
           </thead>
           <tbody>
+            <tr>
+              <td><strong>createQuery()</strong></td>
+              <td>A função createQuery é a função que te ajuda a criar um QueryObject, objeto que o backend espera para filtros ordenações etc...</td>
+              <td><code>[QueryObject]</code></td>
+            </tr>
             <tr>
               <td><strong>createRestMethods(container, service, config/id)</strong></td>
               <td>A função createRestMethods é a função responsável pelo comportamento de criar os métodos do controlador. Ela cria um objeto que serve para agrupar os comportamentos. O objeto tem o seguinte formato</td>
