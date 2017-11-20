@@ -214,10 +214,13 @@ var QueryObject = exports.QueryObject = function () {
             if (!this.service.sendQueryObject) {
                 console.error("Precisamos que você atualize a versão do componente gumga-rest-ng, acesse: https://github.com/GUMGA/gumga-rest-ng/releases");
             }
+            this.queryObject.searchCount = this.controller.page <= 1;
             return this.service.sendQueryObject(this.queryObject).then(function (resp) {
                 _this2.controller.data = resp.data.values;
                 _this2.controller.pageSize = resp.data.pageSize;
-                _this2.controller.count = resp.data.count;
+                if (resp.data.count > 0 && _this2.controller.page <= 1) {
+                    _this2.controller.count = resp.data.count;
+                }
                 return resp;
             });
         }
@@ -261,8 +264,8 @@ var _queryObject = __webpack_require__(0);
 
     this.setPageInContainer = function () {
       if (!self.container[pageModel]) {
-        var page = parseInt(self.storage.get('page') || self.page);
-        self.container[pageModel] = page;
+        var _page = parseInt(self.storage.get('page') || self.page);
+        self.container[pageModel] = _page;
       }
     };
 
@@ -349,7 +352,7 @@ var _queryObject = __webpack_require__(0);
           self.emit('getSuccess', data.data);
           self.data = data.data.values;
           self.pageSize = data.data.pageSize;
-          self.count = data.data.count;
+          if (data.data.count > 0 && page <= 1) self.count = data.data.count;
           self.storage.set('pageSize', data.data.pageSize);
           self.data.map(function (record) {
             return self.records.push(record.id);
@@ -422,7 +425,7 @@ var _queryObject = __webpack_require__(0);
           self.emit('sortSuccess', data.data);
           self.data = data.data.values;
           self.pageSize = data.data.pageSize;
-          self.count = data.data.count;
+          if (data.data.count > 0 && page <= 1) self.count = data.data.count;
           self.storage.set('pageSize', data.data.pageSize);
         }, function (err) {
           self.emit('sortError', err);
@@ -439,7 +442,7 @@ var _queryObject = __webpack_require__(0);
           self.emit('searchSuccess', data.data);
           self.data = data.data.values;
           self.pageSize = data.data.pageSize;
-          self.count = data.data.count;
+          if (data.data.count > 0 && page <= 1) self.count = data.data.count;
           self.storage.set('pageSize', data.data.pageSize);
         }, function (err) {
           self.emit('searchError', err);
@@ -456,7 +459,7 @@ var _queryObject = __webpack_require__(0);
           self.emit('advancedSearchSuccess', data.data);
           self.data = data.data.values;
           self.pageSize = data.data.pageSize;
-          self.count = data.data.count;
+          if (data.data.count > 0 && page <= 1) self.count = data.data.count;
           self.storage.set('pageSize', data.data.pageSize);
         }, function (err) {
           self.emit('advancedSearchError', err);
@@ -472,7 +475,7 @@ var _queryObject = __webpack_require__(0);
           self.emit('searchWithGQuerySuccess', data.data);
           self.data = data.data.values;
           self.pageSize = data.data.pageSize;
-          self.count = data.data.count;
+          if (data.data.count > 0 && page <= 1) self.count = data.data.count;
         }, function (err) {
           self.emit('searchWithGQueryError', err);
         });
@@ -485,7 +488,7 @@ var _queryObject = __webpack_require__(0);
         return Service.searchWithGQuery(gQuery, page, pageSize).then(function (data) {
           self.emit('asyncSearchWithGQuery', data.data);
           self.pageSize = data.data.pageSize;
-          self.count = data.data.count;
+          if (data.data.count > 0 && page <= 1) self.count = data.data.count;
           return data.data.values;
         }, function (err) {
           self.emit('asyncSearchWithGQuery', err);
@@ -497,7 +500,7 @@ var _queryObject = __webpack_require__(0);
           self.emit('redoSearchSuccess', data.data);
           self.data = data.data.values;
           self.pageSize = data.data.pageSize;
-          self.count = data.data.count;
+          if (data.data.count > 0 && page <= 1) self.count = data.data.count;
         }, function (err) {
           self.emit('redoSearchError', err);
         });
