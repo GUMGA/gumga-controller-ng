@@ -77,7 +77,7 @@ export class QueryObject {
         if(!_dir){
             _dir = 'asc';
         }
-        if(_field == null || _dir == null){
+        if(_field == null || _dir == null || _field == 'null' || _dir == 'null'){
             return this;
         }
         this.queryObject.sortField = (this.queryObject.sortField || '').concat(',').concat(_field);
