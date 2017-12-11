@@ -70,7 +70,7 @@
       })
       .controller('restCtrl', ['gumgaController', 'GumgaRest', '$scope', '$http', '$q',
         function (gumgaController, GumgaRest, $scope, $http, $q) {
-          var PessoaService = new GumgaRest('http://192.168.253.246:8084/security-api/api/user');
+          var PessoaService = new GumgaRest('http://192.168.253.246:8084/security-api/api/organization');
 
           gumgaController.createRestMethods($scope, PessoaService, 'pessoa');
 

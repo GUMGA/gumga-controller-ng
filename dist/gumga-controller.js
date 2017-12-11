@@ -175,6 +175,9 @@ var QueryObject = exports.QueryObject = function () {
     }, {
         key: "sort",
         value: function sort(_field, _dir) {
+            if (_field == 'null' || _dir == 'null') {
+                return this;
+            }
             if (!_field) {
                 _field = this.controller.storage.get('field');
                 _dir = this.controller.storage.get('way');
