@@ -1,6 +1,6 @@
 {
   "name": "gumga-controller-ng",
-  "version": "1.9.2",
+  "version": "1.9.3",
   "description": "Gumga Controller",
   "main": "./src/controller.js",
   "authors": [
