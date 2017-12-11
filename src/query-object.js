@@ -70,15 +70,15 @@ export class QueryObject {
      * @param _dir   Direção da ordenação no campo especificado no atributo _field.
     */
     sort(_field, _dir){
-        if(_field == 'null' || _dir == 'null'){
-            return this;
-        }
         if(!_field) {
             _field = this.controller.storage.get('field'); 
             _dir = this.controller.storage.get('way');
         }
         if(!_dir){
             _dir = 'asc';
+        }
+        if(_field == null || _dir == null){
+            return this;
         }
         this.queryObject.sortField = (this.queryObject.sortField || '').concat(',').concat(_field);
         if(this.queryObject.sortField.substring(0, 1) == ',')
