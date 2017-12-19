@@ -310,6 +310,9 @@ var _queryObject = __webpack_require__(0);
         if (!operation) {
           self.methods.get(self.storage.get('page'), self.storage.get('pageSize'));
         }
+        if (!self.count) {
+          self.count = Number(self.storage.get('count'));
+        }
         switch (operation) {
           case 'get':
             self.methods.get(self.storage.get('page'), self.storage.get('pageSize'));
@@ -325,6 +328,20 @@ var _queryObject = __webpack_require__(0);
             break;
           case 'advancedSearch':
             self.methods.advancedSearch(JSON.parse(self.storage.get('param')), self.storage.get('pageSize'), self.storage.get('page'));
+            break;
+          case 'searchWithGQuery':
+            try {
+              self.methods.searchWithGQuery(JSON.parse(self.storage.get('gQuery')), self.storage.get('page'), self.storage.get('pageSize'));
+            } catch (e) {
+              self.methods.searchWithGQuery(undefined, self.storage.get('page'), self.storage.get('pageSize'));
+            }
+            break;
+          case 'asyncSearchWithGQuery':
+            try {
+              self.methods.asyncSearchWithGQuery(JSON.parse(self.storage.get('gQuery')), self.storage.get('page'), self.storage.get('pageSize'));
+            } catch (e) {
+              self.methods.asyncSearchWithGQuery(undefined, self.storage.get('page'), self.storage.get('pageSize'));
+            }
             break;
           default:
             self.methods.get(self.storage.get('page'), self.storage.get('pageSize'));
@@ -350,12 +367,15 @@ var _queryObject = __webpack_require__(0);
         if (!page) page = self.page;
         var storage = self.handlingStorage(page, pageSize);
         self.storage.set('last-operation', 'get');
+        if (self.count > 0) self.storage.set('count', self.count);
         self.emit('getStart');
         Service.get(page, pageSize).then(function (data) {
           self.emit('getSuccess', data.data);
           self.data = data.data.values;
           self.pageSize = data.data.pageSize;
+          if (data.data.count > 0) self.storage.set('count', data.data.count);
           if (data.data.count > 0 && page <= 1) self.count = data.data.count;
+          if (!data.data.count) data.data.count = Number(self.storage.get('count'));
           self.storage.set('pageSize', data.data.pageSize);
           self.data.map(function (record) {
             return self.records.push(record.id);
@@ -423,12 +443,15 @@ var _queryObject = __webpack_require__(0);
         var storage = self.handlingStorage(undefined, pageSize, field, way);
         var page = storage.page;
         self.storage.set('last-operation', 'sort');
+        if (self.count > 0) self.storage.set('count', self.count);
         self.emit('sortStart');
         Service.sort(field, way, pageSize, page).then(function (data) {
           self.emit('sortSuccess', data.data);
           self.data = data.data.values;
           self.pageSize = data.data.pageSize;
+          if (data.data.count > 0) self.storage.set('count', data.data.count);
           if (data.data.count > 0 && page <= 1) self.count = data.data.count;
+          if (!data.data.count) data.data.count = Number(self.storage.get('count'));
           self.storage.set('pageSize', data.data.pageSize);
         }, function (err) {
           self.emit('sortError', err);
@@ -440,12 +463,15 @@ var _queryObject = __webpack_require__(0);
         if (!page) page = self.page;
         var storage = self.handlingStorage(page, pageSize, field, undefined, param);
         self.storage.set('last-operation', 'search');
+        if (self.count > 0) self.storage.set('count', self.count);
         self.emit('searchStart');
         Service.getSearch(field, param, pageSize, page).then(function (data) {
           self.emit('searchSuccess', data.data);
           self.data = data.data.values;
           self.pageSize = data.data.pageSize;
+          if (data.data.count > 0) self.storage.set('count', data.data.count);
           if (data.data.count > 0 && page <= 1) self.count = data.data.count;
+          if (!data.data.count) data.data.count = Number(self.storage.get('count'));
           self.storage.set('pageSize', data.data.pageSize);
         }, function (err) {
           self.emit('searchError', err);
@@ -457,12 +483,15 @@ var _queryObject = __webpack_require__(0);
         if (!page) page = self.page;
         var storage = self.handlingStorage(page, pageSize, undefined, undefined, JSON.stringify(param));
         self.storage.set('last-operation', 'advancedSearch');
+        if (self.count > 0) self.storage.set('count', self.count);
         self.emit('advancedSearchStart');
         Service.getAdvancedSearch(param, pageSize, page).then(function (data) {
           self.emit('advancedSearchSuccess', data.data);
           self.data = data.data.values;
           self.pageSize = data.data.pageSize;
+          if (data.data.count > 0) self.storage.set('count', data.data.count);
           if (data.data.count > 0 && page <= 1) self.count = data.data.count;
+          if (!data.data.count) data.data.count = Number(self.storage.get('count'));
           self.storage.set('pageSize', data.data.pageSize);
         }, function (err) {
           self.emit('advancedSearchError', err);
@@ -472,13 +501,20 @@ var _queryObject = __webpack_require__(0);
       searchWithGQuery: function searchWithGQuery(gQuery, page, pageSize) {
         if (!pageSize) pageSize = self.pageSize;
         if (!page) page = self.page;
+        self.storage.set('pageSize', pageSize);
+        self.storage.set('page', page);
+        if (self.count > 0) self.storage.set('count', self.count);
+        if (gQuery) self.storage.set('gQuery', JSON.stringify(gQuery));
+        self.storage.set('last-operation', 'searchWithGQuery');
         self.lastGQuery = gQuery;
         self.emit('searchWithGQueryStart');
         return Service.searchWithGQuery(gQuery, page, pageSize).then(function (data) {
           self.emit('searchWithGQuerySuccess', data.data);
           self.data = data.data.values;
           self.pageSize = data.data.pageSize;
+          if (data.data.count > 0) self.storage.set('count', data.data.count);
           if (data.data.count > 0 && page <= 1) self.count = data.data.count;
+          if (!data.data.count) data.data.count = Number(self.storage.get('count'));
         }, function (err) {
           self.emit('searchWithGQueryError', err);
         });
@@ -487,11 +523,18 @@ var _queryObject = __webpack_require__(0);
         if (!pageSize) pageSize = self.pageSize;
         if (!page) page = self.page;
         self.lastGQuery = gQuery;
+        if (self.count > 0) self.storage.set('count', self.count);
+        self.storage.set('pageSize', pageSize);
+        self.storage.set('page', page);
+        if (gQuery) self.storage.set('gQuery', JSON.stringify(gQuery));
+        self.storage.set('last-operation', 'asyncSearchWithGQuery');
         self.emit('asyncSearchWithGQuery');
         return Service.searchWithGQuery(gQuery, page, pageSize).then(function (data) {
           self.emit('asyncSearchWithGQuery', data.data);
           self.pageSize = data.data.pageSize;
+          if (data.data.count > 0) self.storage.set('count', data.data.count);
           if (data.data.count > 0 && page <= 1) self.count = data.data.count;
+          if (!data.data.count) data.data.count = Number(self.storage.get('count'));
           return data.data.values;
         }, function (err) {
           self.emit('asyncSearchWithGQuery', err);
