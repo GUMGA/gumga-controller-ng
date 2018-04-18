@@ -473,6 +473,7 @@ var _queryObject = __webpack_require__(0);
           if (data.data.count > 0 && page <= 1) self.count = data.data.count;
           if (!data.data.count) data.data.count = Number(self.storage.get('count'));
           self.storage.set('pageSize', data.data.pageSize);
+          return data;
         }, function (err) {
           self.emit('searchError', err);
         });

@@ -231,6 +231,7 @@ import { QueryObject } from './query-object';
             if(data.data.count > 0 && page <= 1) self.count = data.data.count;
             if(!data.data.count) data.data.count = Number(self.storage.get('count'));
             self.storage.set('pageSize', data.data.pageSize);
+            return data;
           }, (err) => { self.emit('searchError', err); })
         return self;
       },
