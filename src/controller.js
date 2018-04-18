@@ -16,60 +16,60 @@ import { QueryObject } from './query-object';
 
     this.storage = {
       set: (key, value) => {
-        sessionStorage.setItem(identifierOrConfiguration+'-'+key, value);
+        sessionStorage.setItem(identifierOrConfiguration + '-' + key, value);
       },
       get: (key) => {
-        return sessionStorage.getItem(identifierOrConfiguration+'-'+key);
+        return sessionStorage.getItem(identifierOrConfiguration + '-' + key);
       }
     }
 
     this.setPageInContainer = () => {
-      if(!self.container[pageModel]){
+      if (!self.container[pageModel]) {
         const page = parseInt(self.storage.get('page') || self.page);
         self.container[pageModel] = page;
       }
     }
 
     this.handlingStorage = (page, pageSize, field, way, param) => {
-      if(!page){
+      if (!page) {
         page = parseInt(self.storage.get('page') || self.page);
       }
-      if(!pageSize){
+      if (!pageSize) {
         pageSize = parseInt(self.storage.get('pageSize') || self.pageSize);
       }
-      if(!field){
+      if (!field) {
         field = (self.storage.get('field'));
       }
-      if(!way){
+      if (!way) {
         way = (self.storage.get('way'));
       }
-      if(!param){
+      if (!param) {
         param = "";
       }
-      self.storage.set('page',     page     || self.page);
+      self.storage.set('page', page || self.page);
       self.storage.set('pageSize', pageSize || self.pageSize);
-      self.storage.set('field',    field);
-      self.storage.set('way',      way);
-      self.storage.set('param',    param);
+      self.storage.set('field', field);
+      self.storage.set('way', way);
+      self.storage.set('param', param);
 
       return {
-        page    : page,
+        page: page,
         pageSize: pageSize,
-        field:    field,
-        way:      way,
-        param:    param
+        field: field,
+        way: way,
+        param: param
       }
     }
 
     this.methods = {
-      getLatestOperation(){
+      getLatestOperation() {
         self.setPageInContainer();
         const operation = self.storage.get('last-operation');
-        if(!operation){
-            self.methods.get(self.storage.get('page'), self.storage.get('pageSize'));
+        if (!operation) {
+          self.methods.get(self.storage.get('page'), self.storage.get('pageSize'));
         }
-        if(!self.count){
-            self.count = Number(self.storage.get('count'));
+        if (!self.count) {
+          self.count = Number(self.storage.get('count'));
         }
         switch (operation) {
           case 'get':
@@ -88,16 +88,16 @@ import { QueryObject } from './query-object';
             self.methods.advancedSearch(JSON.parse(self.storage.get('param')), self.storage.get('pageSize'), self.storage.get('page'));
             break;
           case 'searchWithGQuery':
-            try{
+            try {
               self.methods.searchWithGQuery(JSON.parse(self.storage.get('gQuery')), self.storage.get('page'), self.storage.get('pageSize'));
-            }catch(e){
+            } catch (e) {
               self.methods.searchWithGQuery(undefined, self.storage.get('page'), self.storage.get('pageSize'));
             }
             break;
           case 'asyncSearchWithGQuery':
-            try{
+            try {
               self.methods.asyncSearchWithGQuery(JSON.parse(self.storage.get('gQuery')), self.storage.get('page'), self.storage.get('pageSize'));
-            }catch(e){
+            } catch (e) {
               self.methods.asyncSearchWithGQuery(undefined, self.storage.get('page'), self.storage.get('pageSize'));
             }
             break;
@@ -123,11 +123,11 @@ import { QueryObject } from './query-object';
         return Service.save(value);
       },
       get(page, pageSize) {
-        if(!pageSize) pageSize = self.pageSize;
-        if(!page) page = self.page;
+        if (!pageSize) pageSize = self.pageSize;
+        if (!page) page = self.page;
         const storage = self.handlingStorage(page, pageSize);
         self.storage.set('last-operation', 'get');
-        if(self.count > 0) self.storage.set('count',    self.count);
+        if (self.count > 0) self.storage.set('count', self.count);
         self.emit('getStart');
         Service
           .get(page, pageSize)
@@ -135,9 +135,9 @@ import { QueryObject } from './query-object';
             self.emit('getSuccess', data.data);
             self.data = data.data.values;
             self.pageSize = data.data.pageSize;
-            if(data.data.count > 0) self.storage.set('count',    data.data.count);
-            if(data.data.count > 0 && page <= 1) self.count = data.data.count;
-            if(!data.data.count) data.data.count = Number(self.storage.get('count'));
+            if (data.data.count > 0) self.storage.set('count', data.data.count);
+            if (data.data.count > 0 && page <= 1) self.count = data.data.count;
+            if (!data.data.count) data.data.count = Number(self.storage.get('count'));
             self.storage.set('pageSize', data.data.pageSize);
             self.data.map(record => self.records.push(record.id))
           }, (err) => { self.emit('getError', err); })
@@ -195,11 +195,11 @@ import { QueryObject } from './query-object';
         return self;
       },
       sort(field, way, pageSize) {
-        if(!pageSize) pageSize = self.pageSize;
+        if (!pageSize) pageSize = self.pageSize;
         const storage = self.handlingStorage(undefined, pageSize, field, way);
-        const page    = storage.page;
+        const page = storage.page;
         self.storage.set('last-operation', 'sort');
-        if(self.count > 0) self.storage.set('count',    self.count);
+        if (self.count > 0) self.storage.set('count', self.count);
         self.emit('sortStart');
         Service
           .sort(field, way, pageSize, page)
@@ -207,19 +207,39 @@ import { QueryObject } from './query-object';
             self.emit('sortSuccess', data.data);
             self.data = data.data.values;
             self.pageSize = data.data.pageSize;
-            if(data.data.count > 0) self.storage.set('count',    data.data.count);
-            if(data.data.count > 0 && page <= 1) self.count = data.data.count;
-            if(!data.data.count) data.data.count = Number(self.storage.get('count'));
+            if (data.data.count > 0) self.storage.set('count', data.data.count);
+            if (data.data.count > 0 && page <= 1) self.count = data.data.count;
+            if (!data.data.count) data.data.count = Number(self.storage.get('count'));
             self.storage.set('pageSize', data.data.pageSize);
           }, (err) => { self.emit('sortError', err); })
         return self;
       },
+      searchWithPagination(field, param, pageSize, page) {
+        if (!pageSize) pageSize = self.pageSize;
+        if (!page) page = self.page;
+        const storage = self.handlingStorage(page, pageSize, field, undefined, param);
+        if (self.count > 0) self.storage.set('count', self.count);
+        self.emit('searchWithPaginationStart');
+        return Service
+          .getSearch(field, param, pageSize, page)
+          .then((data) => {
+            self.emit('searchWithPaginationSuccess', data.data);
+            self.data = data.data.values;
+            self.pageSize = data.data.pageSize;
+            if (data.data.count > 0) self.storage.set('count', data.data.count);
+            if (data.data.count > 0 && page <= 1) self.count = data.data.count;
+            if (!data.data.count) data.data.count = Number(self.storage.get('count'));
+            self.storage.set('pageSize', data.data.pageSize);
+            return data;
+          }, (err) => { self.emit('searchWithPaginationError', err); })
+        return self;
+      },
       search(field, param, pageSize, page) {
-        if(!pageSize) pageSize = self.pageSize;
-        if(!page) page = self.page;
+        if (!pageSize) pageSize = self.pageSize;
+        if (!page) page = self.page;
         const storage = self.handlingStorage(page, pageSize, field, undefined, param);
         self.storage.set('last-operation', 'search');
-        if(self.count > 0) self.storage.set('count',    self.count);
+        if (self.count > 0) self.storage.set('count', self.count);
         self.emit('searchStart');
         Service
           .getSearch(field, param, pageSize, page)
@@ -227,20 +247,20 @@ import { QueryObject } from './query-object';
             self.emit('searchSuccess', data.data);
             self.data = data.data.values;
             self.pageSize = data.data.pageSize;
-            if(data.data.count > 0) self.storage.set('count',    data.data.count);
-            if(data.data.count > 0 && page <= 1) self.count = data.data.count;
-            if(!data.data.count) data.data.count = Number(self.storage.get('count'));
+            if (data.data.count > 0) self.storage.set('count', data.data.count);
+            if (data.data.count > 0 && page <= 1) self.count = data.data.count;
+            if (!data.data.count) data.data.count = Number(self.storage.get('count'));
             self.storage.set('pageSize', data.data.pageSize);
             return data;
           }, (err) => { self.emit('searchError', err); })
         return self;
       },
       advancedSearch(param, pageSize, page) {
-        if(!pageSize) pageSize = self.pageSize;
-        if(!page) page = self.page;
+        if (!pageSize) pageSize = self.pageSize;
+        if (!page) page = self.page;
         const storage = self.handlingStorage(page, pageSize, undefined, undefined, JSON.stringify(param));
         self.storage.set('last-operation', 'advancedSearch');
-        if(self.count > 0) self.storage.set('count',    self.count);
+        if (self.count > 0) self.storage.set('count', self.count);
         self.emit('advancedSearchStart');
         Service
           .getAdvancedSearch(param, pageSize, page)
@@ -248,20 +268,20 @@ import { QueryObject } from './query-object';
             self.emit('advancedSearchSuccess', data.data);
             self.data = data.data.values;
             self.pageSize = data.data.pageSize;
-            if(data.data.count > 0) self.storage.set('count',    data.data.count);
-            if(data.data.count > 0 && page <= 1) self.count = data.data.count;
-            if(!data.data.count) data.data.count = Number(self.storage.get('count'));
+            if (data.data.count > 0) self.storage.set('count', data.data.count);
+            if (data.data.count > 0 && page <= 1) self.count = data.data.count;
+            if (!data.data.count) data.data.count = Number(self.storage.get('count'));
             self.storage.set('pageSize', data.data.pageSize);
           }, (err) => { self.emit('advancedSearchError', err); })
         return self;
       },
-      searchWithGQuery(gQuery, page, pageSize){
-        if(!pageSize) pageSize = self.pageSize;
-        if(!page) page = self.page;
-        self.storage.set('pageSize',    pageSize);
-        self.storage.set('page',    page);
-        if(self.count > 0) self.storage.set('count',    self.count);
-        if(gQuery) self.storage.set('gQuery',    JSON.stringify(gQuery));
+      searchWithGQuery(gQuery, page, pageSize) {
+        if (!pageSize) pageSize = self.pageSize;
+        if (!page) page = self.page;
+        self.storage.set('pageSize', pageSize);
+        self.storage.set('page', page);
+        if (self.count > 0) self.storage.set('count', self.count);
+        if (gQuery) self.storage.set('gQuery', JSON.stringify(gQuery));
         self.storage.set('last-operation', 'searchWithGQuery');
         self.lastGQuery = gQuery;
         self.emit('searchWithGQueryStart');
@@ -271,19 +291,19 @@ import { QueryObject } from './query-object';
             self.emit('searchWithGQuerySuccess', data.data);
             self.data = data.data.values;
             self.pageSize = data.data.pageSize;
-            if(data.data.count > 0) self.storage.set('count',    data.data.count);
-            if(data.data.count > 0 && page <= 1) self.count = data.data.count;
-            if(!data.data.count) data.data.count = Number(self.storage.get('count'));
-          }, (err) => { self.emit('searchWithGQueryError', err); })        
+            if (data.data.count > 0) self.storage.set('count', data.data.count);
+            if (data.data.count > 0 && page <= 1) self.count = data.data.count;
+            if (!data.data.count) data.data.count = Number(self.storage.get('count'));
+          }, (err) => { self.emit('searchWithGQueryError', err); })
       },
-      asyncSearchWithGQuery(gQuery, page, pageSize){
-        if(!pageSize) pageSize = self.pageSize;
-        if(!page) page = self.page;
+      asyncSearchWithGQuery(gQuery, page, pageSize) {
+        if (!pageSize) pageSize = self.pageSize;
+        if (!page) page = self.page;
         self.lastGQuery = gQuery;
-        if(self.count > 0) self.storage.set('count',    self.count);
-        self.storage.set('pageSize',    pageSize);
-        self.storage.set('page',    page);
-        if(gQuery) self.storage.set('gQuery',    JSON.stringify(gQuery));
+        if (self.count > 0) self.storage.set('count', self.count);
+        self.storage.set('pageSize', pageSize);
+        self.storage.set('page', page);
+        if (gQuery) self.storage.set('gQuery', JSON.stringify(gQuery));
         self.storage.set('last-operation', 'asyncSearchWithGQuery');
         self.emit('asyncSearchWithGQuery');
         return Service
@@ -291,11 +311,11 @@ import { QueryObject } from './query-object';
           .then((data) => {
             self.emit('asyncSearchWithGQuery', data.data);
             self.pageSize = data.data.pageSize;
-            if(data.data.count > 0) self.storage.set('count',    data.data.count);
-            if(data.data.count > 0 && page <= 1) self.count = data.data.count;
-            if(!data.data.count) data.data.count = Number(self.storage.get('count'));
+            if (data.data.count > 0) self.storage.set('count', data.data.count);
+            if (data.data.count > 0 && page <= 1) self.count = data.data.count;
+            if (!data.data.count) data.data.count = Number(self.storage.get('count'));
             return data.data.values
-          }, (err) => { self.emit('asyncSearchWithGQuery', err); })        
+          }, (err) => { self.emit('asyncSearchWithGQuery', err); })
       },
       redoSearch() {
         self.emit('redoSearchStart');
@@ -305,7 +325,7 @@ import { QueryObject } from './query-object';
             self.emit('redoSearchSuccess', data.data);
             self.data = data.data.values;
             self.pageSize = data.data.pageSize;
-            if(data.data.count > 0 && page <= 1) self.count = data.data.count;
+            if (data.data.count > 0 && page <= 1) self.count = data.data.count;
           }, (err) => { self.emit('redoSearchError', err); })
         return self;
       },
@@ -318,7 +338,7 @@ import { QueryObject } from './query-object';
         return self;
       },
       getQuery(page) {
-        if(!page) page = self.page;
+        if (!page) page = self.page;
         self.emit('getQueryStart');
         return Service
           .getQuery(page)
@@ -370,7 +390,7 @@ import { QueryObject } from './query-object';
         self.emit('getDocumentationURLStart')
         return Service.getDocumentationURL()
       },
-      createQuery(){
+      createQuery() {
         return new QueryObject(Service, self);
       }
     };

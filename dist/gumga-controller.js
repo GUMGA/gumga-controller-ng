@@ -458,6 +458,26 @@ var _queryObject = __webpack_require__(0);
         });
         return self;
       },
+      searchWithPagination: function searchWithPagination(field, param, pageSize, page) {
+        if (!pageSize) pageSize = self.pageSize;
+        if (!page) page = self.page;
+        var storage = self.handlingStorage(page, pageSize, field, undefined, param);
+        if (self.count > 0) self.storage.set('count', self.count);
+        self.emit('searchWithPaginationStart');
+        return Service.getSearch(field, param, pageSize, page).then(function (data) {
+          self.emit('searchWithPaginationSuccess', data.data);
+          self.data = data.data.values;
+          self.pageSize = data.data.pageSize;
+          if (data.data.count > 0) self.storage.set('count', data.data.count);
+          if (data.data.count > 0 && page <= 1) self.count = data.data.count;
+          if (!data.data.count) data.data.count = Number(self.storage.get('count'));
+          self.storage.set('pageSize', data.data.pageSize);
+          return data;
+        }, function (err) {
+          self.emit('searchWithPaginationError', err);
+        });
+        return self;
+      },
       search: function search(field, param, pageSize, page) {
         if (!pageSize) pageSize = self.pageSize;
         if (!page) page = self.page;
